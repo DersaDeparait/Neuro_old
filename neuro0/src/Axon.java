@@ -1,4 +1,10 @@
 public class Axon extends ActiveElement {
+    static int internalNumber = -1;
+    static int giveName(){
+        internalNumber++;
+        return internalNumber;
+    }
+
     //region fields
     String name; // Назва
 
@@ -11,6 +17,7 @@ public class Axon extends ActiveElement {
     //endregion
 
     public Axon(){
+        name = "A" + giveName();
         parent = null;
         child = null;
         weight = 0.5;
@@ -36,7 +43,6 @@ public class Axon extends ActiveElement {
     protected void updateActive() {
         child.getDataFromAxon(this, outputData); // Надіслати дані на нейрон наслідник
         setPassive();
-        System.out.println(parent.getName() + " " + child.getName()); // FIXME: 4/8/2019
     }
 
     /**
@@ -47,5 +53,10 @@ public class Axon extends ActiveElement {
         this.inputData = data;
         this.outputData = inputData * weight;
         setActive();
+    }
+
+    public void print(){
+        System.out.printf("%9s(%.5s : %.5s)  s:%.4s  W:%9f  input:%9f  output:%9f \n",
+                name, parent.getName(), child.getName(), state.getName(), weight, inputData, outputData);
     }
 }

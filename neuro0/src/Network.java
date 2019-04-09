@@ -5,7 +5,9 @@ import java.util.LinkedList;
  */
 public class Network {
     //region fields
-    int numberOfTry = 1; // Кількість закидувань даних в нейромережу
+    int numberOfTry = 8; // Кількість закидувань даних в нейромережу
+    int currentTry = 0; // Поточний номер закидування
+    int cycleCounter = 0; // Лічильник циклів
 
     LinkedList<Axon> axons; // Всі аксони
     LinkedList<Neuron> neurons; // Всі нейрони
@@ -23,8 +25,6 @@ public class Network {
         compound(neurons.get(0), neurons.get(1));
         compound(neurons.get(1), neurons.get(2));
         compound(neurons.get(2), neurons.get(3));
-
-        neurons.get(0).makeImpulse(1);
     }
     private void compound(Neuron parent, Neuron child){
         Axon axon = new Axon();
@@ -39,16 +39,22 @@ public class Network {
 
     //region update
     public void update(){
-        for (int i = 0; i < numberOfTry; i++){
+        for (currentTry = 0; currentTry < numberOfTry; currentTry++){
+            System.out.println("\n---------------------------------------------  " + currentTry + "  --------------------------------------------");
+            startImpulse();
             runOneTime();
         }
     }
+    private void startImpulse(){
+        neurons.get(0).makeImpulse(1);
+    }
     private void runOneTime() {
-        int counter = 0; // Лічильник циклів
+        cycleCounter = 0; // Лічильник циклів
+        print();
         while(checkActivity()){
-            System.out.println("Cycle: "+ counter);
             oneImpulse();
-            counter++;
+            cycleCounter++;
+            print();
         }
     }
     /**
@@ -81,12 +87,14 @@ public class Network {
     }
     //endregion
 
-    /**
-     * Вивести результати
-     * @return результат
-     */
-    @Override
-    public String toString() {
-        return "" + numberOfTry;
+    public void print(){
+        System.out.printf("\nTry: %5d/%-5d, Cycle%-5d\n", currentTry, numberOfTry, cycleCounter);
+        for (int i = 0; i < axons.size(); i++) {
+            axons.get(i).print();
+        }
+        System.out.print("\n");
+        for (int i = 0; i < neurons.size(); i++) {
+            neurons.get(i).print();
+        }
     }
 }

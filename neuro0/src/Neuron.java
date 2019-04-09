@@ -61,7 +61,6 @@ public class Neuron extends ActiveElement {
         activationFunction(); // Вирахувати значення після підстановки в функції
         sendData(); // Надіслати дані на нейрони
         setPassive(); // Зробити пасивним нейрон
-        System.out.println(name); // FIXME: 4/8/2019 change
     }
     protected void calculateSum(){
         dataInput = 0;
@@ -95,4 +94,8 @@ public class Neuron extends ActiveElement {
         }
     }
 
+
+    public void print(){
+        System.out.printf("%9s  s:%.4s  dI:%9f  dO:%9f  offset:%9f \n", name, state.getName(), dataInput, dataOutput, offset);
+    }
 }
