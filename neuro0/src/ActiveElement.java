@@ -7,6 +7,12 @@ public class ActiveElement {
 
     public void setActive(){ state = State.ACTIVE; }
     public void setPassive(){ state = State.PASSIVE; }
+    public boolean isWork(){
+        if (state == State.ACTIVE)
+            return true;
+        else
+            return false;
+    }
 
     public void update(){
         switch(state){
