@@ -17,6 +17,7 @@ public class Neuron extends ActiveElement {
     private double offset; // Нейрон зміщення
 
     private LinkedList<Double> axonInputData; // Вхідні дані із відповідних аксонів
+    private LinkedList<Boolean> isNewDataFromAxon; // Чи є поточні дані з аксона новими
     private LinkedList<Axon> axonInput; // Вхідні аксони
     private LinkedList<Axon> axonOutput; // Вихідні аксони
     //endregion
@@ -34,13 +35,14 @@ public class Neuron extends ActiveElement {
         offset = 0;
 
         axonInputData =  new LinkedList<>();
+        isNewDataFromAxon = new LinkedList<>();
         axonInput = new LinkedList<>();
         axonOutput = new LinkedList<>();
     }
     //endregion
 
     //region add/get/set
-    public void addAxonInput(Axon axon){ axonInput.add(axon); axonInputData.add(defaultValueOfData); }
+    public void addAxonInput(Axon axon){ axonInput.add(axon); axonInputData.add(defaultValueOfData); isNewDataFromAxon.add(false); }
     public void addAxonOutput(Axon axon){ axonOutput.add(axon); }
 
     public String getName() { return name; }
@@ -64,7 +66,10 @@ public class Neuron extends ActiveElement {
     protected void calculateSum(){
         dataInput = 0;
         for (int i = 0; i < axonInputData.size(); i++) {
-            dataInput += axonInputData.get(i);
+            if (isNewDataFromAxon.get(i)) {
+                dataInput += axonInputData.get(i);
+                isNewDataFromAxon.set(i, false);
+            }
         }
         dataInput += offset;
     }
@@ -94,6 +99,7 @@ public class Neuron extends ActiveElement {
         for (int i = 0; i < axonInput.size(); i++) {
             if (axonInput.get(i) == axon) {
                 this.axonInputData.set(i, data);
+                this.isNewDataFromAxon.set(i, true);
                 setActive();
                 break;
             }

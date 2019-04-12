@@ -17,14 +17,56 @@ public class Network {
     public Network() {
         neurons = new LinkedList<>();
         axons = new LinkedList<>();
-        neurons.add(new Neuron("First"));
-        neurons.add(new Neuron("Second"));
-        neurons.add(new Neuron("Third"));
-        neurons.add(new Neuron("Last"));
 
-        compound(neurons.get(0), neurons.get(1));
-        compound(neurons.get(1), neurons.get(2));
-        compound(neurons.get(2), neurons.get(3));
+        makeLayers(new int[]{4, 2, 6, 2, 1, 2});
+
+    }
+    private void makeLayers(int[] numberOfNeuronInLayer){
+        if (numberOfNeuronInLayer != null && numberOfNeuronInLayer.length > 1 && numberOfNeuronInLayer[0] > 0) {
+            int[] lastNumberOfNeuronsMassive = new int[numberOfNeuronInLayer.length];
+            lastNumberOfNeuronsMassive[0] = neurons.size();
+
+            for (int i = lastNumberOfNeuronsMassive[0]; i < numberOfNeuronInLayer[0] + lastNumberOfNeuronsMassive[0]; i++) {
+                neurons.add(new Neuron("t0-n" + (i - lastNumberOfNeuronsMassive[0])));
+            }
+
+            for (int i = 1; i < numberOfNeuronInLayer.length; i++) {
+                if (numberOfNeuronInLayer[i] > 0) {
+                    lastNumberOfNeuronsMassive[i] = neurons.size();
+                    for (int j = lastNumberOfNeuronsMassive[i]; j < lastNumberOfNeuronsMassive[i] + numberOfNeuronInLayer[i]; j++) {
+                        neurons.add(new Neuron("t"+ i +"-n" + (j - lastNumberOfNeuronsMassive[i])));
+                    }
+                    layerCompound(neurons,
+                            lastNumberOfNeuronsMassive[i-1], lastNumberOfNeuronsMassive[i],
+                            lastNumberOfNeuronsMassive[i], lastNumberOfNeuronsMassive[i] + numberOfNeuronInLayer[i]);
+                } else
+                    break;
+            }
+        }
+    }
+    private void layerCompound(LinkedList<Neuron> neurons, int firstMassiveFrom, int firstMassiveTo, int secondMassiveFrom, int secondMassiveTo){
+        if (neurons != null
+                && firstMassiveFrom > -1 && firstMassiveTo > -1
+                && secondMassiveFrom > -1 && secondMassiveTo > -1
+                && firstMassiveTo > firstMassiveFrom && secondMassiveTo > secondMassiveFrom
+                && neurons.size() >= firstMassiveTo && neurons.size() >= secondMassiveTo
+        ){
+            for (int i = firstMassiveFrom; i < firstMassiveTo; i++) {
+                for (int j = secondMassiveFrom; j < secondMassiveTo; j++) {
+                    if (neurons.get(i) != null && neurons.get(j) != null)
+                        compound(neurons.get(i), neurons.get(j));
+                }
+            }
+        }
+    }
+    private void layerCompound(Neuron[] parentLayer, Neuron[] childLayer) {
+        if (parentLayer != null && childLayer != null)
+            for (int i = 0; i < parentLayer.length; i++) {
+                for (int j = 0; j < childLayer.length; j++) {
+                    if (parentLayer[i] != null && childLayer[j] != null)
+                        compound(parentLayer[i], childLayer[j]);
+                }
+            }
     }
     private void compound(Neuron parent, Neuron child){
         Axon axon = new Axon();

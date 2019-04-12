@@ -56,7 +56,7 @@ public class Axon extends ActiveElement {
     }
 
     public void print(){
-        System.out.printf("%9s(%.5s : %.5s)  s:%.4s  W:%9f  input:%9f  output:%9f \n",
+        System.out.printf("%9s(%.10s : %.10s)  s:%.4s  W:%9f  input:%9f  output:%9f \n",
                 name, parent.getName(), child.getName(), state.getName(), weight, inputData, outputData);
     }
 }
