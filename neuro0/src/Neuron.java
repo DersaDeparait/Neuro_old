@@ -4,9 +4,9 @@ public class Neuron extends ActiveElement {
     //region static
     double defaultValueOfData = -100; // Початкове значення всіх даних із аксонів
     static double findOutputFromInput(double input) { return findNormalSigmoid(input); }
-    static double findNormalSigmoid(double input) { return 1/(1- Math.exp(-input)); }
+    static double findNormalSigmoid(double input) { return 1/(1 + Math.exp(-input)); }
     static double findNormalLinear(double input) { return input; }
-    static double findNormalHipper(double input) { return (Math.exp(2*input)-1)/(Math.exp(2*input)+1); }
+    static double findNormalHipper(double input) { return (Math.exp(2 * input) - 1)/(Math.exp(2 * input) + 1); }
     //endregion
 
     //region fields
@@ -26,7 +26,6 @@ public class Neuron extends ActiveElement {
         this();
         this.name = name;
     }
-
     public Neuron(){
         name = "";
 
@@ -77,11 +76,18 @@ public class Neuron extends ActiveElement {
             axonOutput.get(i).getDataFromParent(dataOutput);
         }
     }
+
+    @Override
+    public void setFirst() {
+        sendData();
+        setPassive();
+    }
+
     //endregion
 
     public void makeImpulse(double data){
         dataInput = dataOutput = data;
-        setActive();
+        setFirst();
     }
 
     public void getDataFromAxon(Axon axon, double data){

@@ -5,7 +5,7 @@ import java.util.LinkedList;
  */
 public class Network {
     //region fields
-    int numberOfTry = 8; // Кількість закидувань даних в нейромережу
+    int numberOfTry = 3; // Кількість закидувань даних в нейромережу
     int currentTry = 0; // Поточний номер закидування
     int cycleCounter = 0; // Лічильник циклів
 
