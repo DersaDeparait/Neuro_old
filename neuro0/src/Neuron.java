@@ -2,11 +2,15 @@ import java.util.LinkedList;
 
 public class Neuron extends ActiveElement {
     //region static
-    double defaultValueOfData = -100; // Початкове значення всіх даних із аксонів
+    static double defaultValueOfData = -100; // Початкове значення всіх даних із аксонів
     static double findOutputFromInput(double input) { return findNormalSigmoid(input); }
     static double findNormalSigmoid(double input) { return 1/(1 + Math.exp(-input)); }
     static double findNormalLinear(double input) { return input; }
     static double findNormalHipper(double input) { return (Math.exp(2 * input) - 1)/(Math.exp(2 * input) + 1); }
+
+    static double findSigmoidDerivative(double out){ return findSigmoidDerivativeSigmoid(out); }
+    static double findSigmoidDerivativeSigmoid(double out){ return (1-out) * out; }
+    static double findSigmoidDerivativeTangh(double out){ return 1-out * out; }
     //endregion
 
     //region fields
@@ -14,11 +18,15 @@ public class Neuron extends ActiveElement {
 
     private double dataInput; // Дані входу
     private double dataOutput; // Дані виходу
+    private double dataIdeal; // Ідеальні дані які мають бути
     private double offset; // Нейрон зміщення
+
+    private double delta;
 
     private LinkedList<Double> axonInputData; // Вхідні дані із відповідних аксонів
     private LinkedList<Boolean> isNewDataFromAxon; // Чи є поточні дані з аксона новими
     private LinkedList<Axon> axonInput; // Вхідні аксони
+
     private LinkedList<Axon> axonOutput; // Вихідні аксони
     //endregion
 
@@ -63,6 +71,10 @@ public class Neuron extends ActiveElement {
         sendData(); // Надіслати дані на нейрони
         setPassive(); // Зробити пасивним нейрон
     }
+    protected void updateFirst(){
+        sendData();
+        setPassive();
+    }
     protected void calculateSum(){
         dataInput = 0;
         for (int i = 0; i < axonInputData.size(); i++) {
@@ -82,11 +94,41 @@ public class Neuron extends ActiveElement {
         }
     }
 
-    @Override
-    public void setFirst() {
-        sendData();
+    protected void updateBackwardFirst(){
+        findDelta0();
+        sendDataBack();
         setPassive();
     }
+    protected void findDelta0(){
+         delta = (dataIdeal - dataOutput) * findSigmoidDerivative(dataOutput);
+    }
+    private void sendDataBack(){
+        for (int i = 0; i < axonInput.size(); i++) {
+            axonInput.get(i).getParent().setBackward();
+        }
+    }
+
+    protected void updateBackward(){
+        findDelta();
+        findGradForAxon();
+        setPassive();
+    }
+    protected void findDelta(){
+        double wei = 0;
+        for (int i = 0; i < axonOutput.size(); i++) {
+            wei += axonOutput.get(i).weight * axonOutput.get(i).getChild().delta;
+        }
+        delta = findSigmoidDerivative(dataOutput) * wei;
+    }
+    protected void findGradForAxon(){
+        for (int i = 0; i < axonOutput.size(); i++) {
+            axonOutput.get(i).calculateNewWeight(dataOutput, axonOutput.get(i).getChild().delta);
+        }
+    }
+
+    @Override
+    public void setFirst() { state = State.FIRST; }
+    public void setBackwardFirst(double dataIdeal){ state = State.BACKWARD_FIRST; this.dataIdeal = dataIdeal; }
 
     //endregion
 
@@ -106,8 +148,19 @@ public class Neuron extends ActiveElement {
         }
     }
 
+    @Override
+    public void printActive(){
+        System.out.printf("\n\t\t\t   %9s dI:%9f  offset:%9f  dO:%9f", name, dataInput, offset, dataOutput);
+    }
+    @Override
+    public void printBackward(){
+        System.out.printf("\n\t\t\t   %9s dI:%9f  offset:%9f  dO:%9f  delta:%9f", name, dataInput, offset, dataOutput, delta);
+    }
 
-    public void print(){
-        System.out.printf("%9s  s:%.4s  dI:%9f  dO:%9f  offset:%9f \n", name, state.getName(), dataInput, dataOutput, offset);
+    public void clearData(){
+        dataInput = Double.NaN;
+        dataOutput = Double.NaN;
+        dataIdeal = Double.NaN;
+        delta = Double.NaN;
     }
 }

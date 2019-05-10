@@ -1,4 +1,7 @@
 public class Axon extends ActiveElement {
+    public static final double EPSILON = 3.0; // Швидкість вивчення
+    public static final double ALPHA = 0.1; // Момент вивчення
+
     static int internalNumber = -1;
     static int giveName(){
         internalNumber++;
@@ -14,6 +17,10 @@ public class Axon extends ActiveElement {
     double weight; // Поточна вага
     double inputData; // Вхідні дані
     double outputData; // Вихідні дані
+
+    double grad; // Градієнт
+    double deltaWeight; // Зміна ваги нейрона
+    double deltaWeightLast; // Минула зміна ваги
     //endregion
 
     public Axon(){
@@ -21,6 +28,10 @@ public class Axon extends ActiveElement {
         parent = null;
         child = null;
         weight = 0.5;
+
+        grad = Double.NaN;
+        deltaWeight = Double.NaN;
+        deltaWeightLast = 0;
     }
 
     //region get/set
@@ -55,8 +66,40 @@ public class Axon extends ActiveElement {
         setActive();
     }
 
-    public void print(){
-        System.out.printf("%9s(%.10s : %.10s)  s:%.4s  W:%9f  input:%9f  output:%9f \n",
-                name, parent.getName(), child.getName(), state.getName(), weight, inputData, outputData);
+    public void calculateNewWeight(double fatherOutput, double childDelta){
+        calculateGrad(fatherOutput, childDelta);
+        calculateDeltaWeight();
+        printShortData();
+        changeWeight();
+        changeDeltaWeightLast();
+    }
+    private void calculateGrad(double fatherOutput, double childDelta){
+        grad = fatherOutput * childDelta;
+    }
+    private void calculateDeltaWeight(){
+        deltaWeight = EPSILON * grad + ALPHA * deltaWeightLast;
+    }
+    private void printShortData(){
+        System.out.printf("\nChanges %9s(%.10s : %.10s)  Weight:%9f  deltaWei:%9f  lastWei:%9f  newWei:%9f  grab:%9f",
+                name, parent.getName(), child.getName(), weight, deltaWeight,   deltaWeightLast, (weight + deltaWeight), grad);
+    }
+    private void changeWeight(){
+        weight += deltaWeight;
+    }
+    private void changeDeltaWeightLast(){
+        deltaWeightLast = deltaWeight;
+    }
+
+    @Override
+    public void printActive(){
+        System.out.printf("\n%9s(%.10s : %.10s) dI:%9f  Weight:%9f  dO:%9f ",
+                name, parent.getName(), child.getName(), inputData, weight, outputData);
+    }
+
+    public void clearData(){
+        inputData = Double.NaN;
+        outputData = Double.NaN;
+        grad = Double.NaN;
+        deltaWeight = Double.NaN;
     }
 }
